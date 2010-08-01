@@ -1,1 +1,15 @@
+# From the build processes
 ebin/*.beam
+erl_crash.dump
+doc/*
+# Xcode
+build/*
+*.xcodeproj/*
+
+# OS X
+.DS_Store
+profile
+
+# Vim
+*.swp
+*.swo
