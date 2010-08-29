@@ -14,7 +14,13 @@ Use the version in combined_version.
 What Exactly Does It Do?
 ========================
 
-Let us get back to you on that.
+Leader election behavior.
+-------------------------
+
+This application implements a leader election behavior modeled after
+gen_server. This behavior intends to make it reasonably
+straightforward to implement a fully distributed server with
+master-slave semantics.
 
 Current Participants
 ====================
