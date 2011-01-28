@@ -1403,11 +1403,23 @@ mon_nodes(E,Nodes,Server) ->
               mon_node(El, Pid, Server)
       end,E1,Nodes -- [node()]).
 
-%% Star monitoring one Process
-mon_node(E,Proc,Server) ->
-    {Ref,Node} = do_monitor(Proc, Server),
-    E#election{monitored = [{Ref,Node} | E#election.monitored]}.
+%% Start monitoring one Process
+mon_node(E,{_RegName, NodeName} = Proc,Server) ->
+    case lists:keymember(NodeName, 2, E#election.monitored) of
+	    true -> E;
+	    false ->
+                {Ref,Node} = do_monitor(Proc, Server),
+                E#election{monitored = [{Ref,Node} | E#election.monitored]}
+    end;
 
+mon_node(E,Proc,Server) when is_pid(Proc) ->
+    case lists:keymember(node(Proc), 2, E#election.monitored) of
+	    true -> E;
+	    false ->
+                {Ref,Node} = do_monitor(Proc, Server),
+                E#election{monitored = [{Ref,Node} | E#election.monitored]}
+    end
+    .
 
 spawn_monitor_proc() ->
     Parent = self(),
