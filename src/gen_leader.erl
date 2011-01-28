@@ -446,9 +446,7 @@ init_it(Starter,Parent,Name,Mod,{CandidateNodes,OptArgs,Arg},Options) ->
                     hasBecomeLeader(NewE,Server,{init});
                 false ->
                     %% more than one candidate worker, continue as normal
-                    safe_loop(#server{parent = Parent,mod = Mod,
-                                      state = State,debug = Debug},
-                              candidate, NewE,{init})
+                    safe_loop(Server, candidate, NewE,{init})
             end;
         {{ok, State}, true, true} ->
             Server = #server{parent = Parent,mod = Mod,
