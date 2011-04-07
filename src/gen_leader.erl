@@ -1012,10 +1012,11 @@ handle_msg({'$leader_call', From, Request} = Msg, Server, Role,
 handle_msg({Ref, {leader,reply,Reply}} = Msg, Server, Role,
            #election{buffered = Buffered} = E) ->
     {value, {_,From}} = lists:keysearch(Ref,1,Buffered),
-    NewServer = reply(From, {leader,reply,Reply}, Server, Role,
-                      E#election{buffered =
-                                     lists:keydelete(Ref,1,Buffered)}),
-    loop(NewServer, Role, E, Msg);
+    El = E#election{buffered = lists:keydelete(Ref,1,Buffered)},
+
+    NewServer = reply(From, {leader,reply,Reply}, Server, Role, El),
+
+    loop(NewServer, Role, El, Msg);
 handle_msg({'$gen_call', From, get_candidates} = Msg, Server, Role, E) ->
     NewServer = reply(From, {ok, candidates(E)}, Server, Role, E),
     loop(NewServer, Role, E, Msg);
