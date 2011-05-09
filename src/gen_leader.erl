@@ -156,6 +156,10 @@
           bcast_type                :: bcast_type()
          }).
 
+-opaque election() :: #election{}.
+
+-export_type([election/0]).
+
 -record(server, {
           parent,
           mod,
@@ -242,27 +246,27 @@ start_link(Name, CandidateNodes, OptArgs, Mod, Arg, Options)
 %% Query functions to be used from the callback module
 
 %% @doc Returns list of alive nodes.
--spec alive(#election{}) -> [node()].
+-spec alive(election()) -> [node()].
 alive(E) ->
     candidates(E) -- down(E).
 
 %% @doc Returns list of down nodes.
--spec down(#election{}) -> [node()].
+-spec down(election()) -> [node()].
 down(#election{down = Down}) ->
     Down.
 
 %% @doc Returns the current leader node.
--spec leader_node(#election{}) -> node() | 'none'.
+-spec leader_node(election()) -> node() | 'none'.
 leader_node(#election{leadernode=Leader}) ->
     Leader.
 
 %% @doc Returns a list of known candidates.
--spec candidates(#election{}) -> [node()].
+-spec candidates(election()) -> [node()].
 candidates(#election{candidate_nodes = Cands}) ->
     Cands.
 
 %% @doc Returns a list of known workers.
--spec workers(#election{}) -> [node()].
+-spec workers(election()) -> [node()].
 workers(#election{worker_nodes = Workers}) ->
     Workers.
 
@@ -344,23 +348,23 @@ leader_call(Name, Request, Timeout) ->
 
 
 %% @equiv gen_server:cast/2
--spec cast(Name::name()|pid(), Request::term()) -> 'ok'.
+-spec cast(Name::server_ref(), Request::term()) -> 'ok'.
 cast(Name, Request) ->
     catch do_cast('$gen_cast', Name, Request),
     ok.
 
 %% @doc Similar to <code>gen_server:cast/2</code> but will be forwarded to
 %% the leader via the local gen_leader instance.
--spec leader_cast(Name::name()|pid(), Request::term()) -> 'ok'.
+-spec leader_cast(Name::server_ref(), Request::term()) -> 'ok'.
 leader_cast(Name, Request) ->
     catch do_cast('$leader_cast', Name, Request),
     ok.
 
 
-do_cast(Tag, Name, Request) when is_atom(Name) ->
-    Name ! {Tag, Request};
-do_cast(Tag, Pid, Request) when is_pid(Pid) ->
-    Pid ! {Tag, Request}.
+do_cast(Tag, {global, Name}, Request) ->
+    global:send(Name, {Tag, Request});
+do_cast(Tag, ServerRef, Request) ->
+    ServerRef ! {Tag, Request}.
 
 
 %% @equiv gen_server:reply/2
