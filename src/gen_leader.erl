@@ -450,9 +450,7 @@ init_it(Starter,Parent,Name,Mod,{CandidateNodes,OptArgs,Arg},Options) ->
                     hasBecomeLeader(NewE,Server,{init});
                 false ->
                     %% more than one candidate worker, continue as normal
-                    safe_loop(#server{parent = Parent,mod = Mod,
-                                      state = State,debug = Debug},
-                              candidate, NewE,{init})
+                    safe_loop(Server, candidate, NewE,{init})
             end;
         {{ok, State}, true, true} ->
             Server = #server{parent = Parent,mod = Mod,
@@ -1018,10 +1016,11 @@ handle_msg({'$leader_call', From, Request} = Msg, Server, Role,
 handle_msg({Ref, {leader,reply,Reply}} = Msg, Server, Role,
            #election{buffered = Buffered} = E) ->
     {value, {_,From}} = lists:keysearch(Ref,1,Buffered),
-    NewServer = reply(From, {leader,reply,Reply}, Server, Role,
-                      E#election{buffered =
-                                     lists:keydelete(Ref,1,Buffered)}),
-    loop(NewServer, Role, E, Msg);
+    El = E#election{buffered = lists:keydelete(Ref,1,Buffered)},
+
+    NewServer = reply(From, {leader,reply,Reply}, Server, Role, El),
+
+    loop(NewServer, Role, El, Msg);
 handle_msg({'$gen_call', From, get_candidates} = Msg, Server, Role, E) ->
     NewServer = reply(From, {ok, candidates(E)}, Server, Role, E),
     loop(NewServer, Role, E, Msg);
@@ -1409,11 +1408,23 @@ mon_nodes(E,Nodes,Server) ->
               mon_node(El, Pid, Server)
       end,E1,Nodes -- [node()]).
 
-%% Star monitoring one Process
-mon_node(E,Proc,Server) ->
-    {Ref,Node} = do_monitor(Proc, Server),
-    E#election{monitored = [{Ref,Node} | E#election.monitored]}.
+%% Start monitoring one Process
+mon_node(E,{_RegName, NodeName} = Proc,Server) ->
+    case lists:keymember(NodeName, 2, E#election.monitored) of
+	    true -> E;
+	    false ->
+                {Ref,Node} = do_monitor(Proc, Server),
+                E#election{monitored = [{Ref,Node} | E#election.monitored]}
+    end;
 
+mon_node(E,Proc,Server) when is_pid(Proc) ->
+    case lists:keymember(node(Proc), 2, E#election.monitored) of
+	    true -> E;
+	    false ->
+                {Ref,Node} = do_monitor(Proc, Server),
+                E#election{monitored = [{Ref,Node} | E#election.monitored]}
+    end
+    .
 
 spawn_monitor_proc() ->
     Parent = self(),
@@ -1448,7 +1459,7 @@ mon_handle_req({monitor, P}, From, Refs) ->
                Pid when is_pid(Pid) -> node(Pid)
            end,
     case lists:keyfind(Node, 2, Refs) of
-        {_, Ref} ->
+        {Ref, _} ->
             mon_reply(From, {Ref,Node}),
             Refs;
         false ->
