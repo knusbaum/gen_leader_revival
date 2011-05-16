@@ -4,6 +4,11 @@
                    'ignore' |
                    {'stop', Reason::term()}.
 
+%% elected(_,_,node()) - captured a single candidate
+%%   reply notifies only the new candidate of the
+%%   sync state, ok notifies all candidates
+%% elected(_,_,undefined) - won a general election
+%%   ok broadcasts sync to all candidates
 -spec elected(State, gen_leader:election(), node() | 'undefined') ->
                      {'ok', Sync::term(), State} |
                      {'reply', Sync::term(), State}.
