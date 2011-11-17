@@ -484,6 +484,10 @@ init_it(Starter,Parent,Name,Mod,{CandidateNodes,OptArgs,Arg},Options) ->
 %%% The MAIN loops.
 %%% ---------------------------------------------------
 
+% this is the election loop.  Only specific messages related
+% to the election process are received.  User messages, defined
+% in e.g. a callback module, are postponed until the (re)election\
+% is complete.
 safe_loop(#server{mod = Mod, state = State} = Server, Role,
           #election{name = Name} = E, _PrevMsg) ->
     receive
@@ -725,6 +729,8 @@ safe_loop(#server{mod = Mod, state = State} = Server, Role,
     end.
 
 
+% this is the regular operation loop.  All messages are received,
+% unexpected ones are discarded.
 loop(#server{parent = Parent,
              mod = Mod,
              state = State,
