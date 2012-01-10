@@ -13,3 +13,6 @@ profile
 # Vim
 *.swp
 *.swo
+
+# Emacs
+*~
