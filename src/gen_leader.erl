@@ -1531,7 +1531,7 @@ do_monitor(Proc, #server{monitor_proc = P}) ->
     receive
         {mon_reply, Reply} ->
             Reply
-    after 5000 ->
+    after 10000 -> % can take quite a while to receive mon_reply if the node is down
             erlang:error(timeout)
     end.
 
