@@ -880,8 +880,8 @@ loop(#server{parent = Parent,
                                     {Name, N} ! {election}
                                 end, E1#election.candidate_nodes),
                             %% Start participating in the election ourselves.
-                            E1 = startStage1(E, Server),
-                            safe_loop(Server, candidate, E1, Msg);
+                            E2 = startStage1(E, Server),
+                            safe_loop(Server, candidate, E2, Msg);
                         false ->
                             %% Not a leader, just wait to be told to do an
                             %% election, if applicable.
