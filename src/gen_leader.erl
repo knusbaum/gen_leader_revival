@@ -184,7 +184,7 @@ behaviour_info(callbacks) ->
      {handle_call,4},
      {handle_cast,3},
      {handle_DOWN,3},
-     {handle_info,2},
+     {handle_info,3},
      {terminate,2},
      {code_change,4}];
 behaviour_info(_Other) ->
@@ -1161,7 +1161,7 @@ handle_msg({'$leader_cast', Msg} = Cast, Server, Role,
     loop(Server, Role, E, Cast);
 
 handle_msg(Msg, #server{mod = Mod, state = State} = Server, Role, E) ->
-    handle_common_reply(catch Mod:handle_info(Msg, State),
+    handle_common_reply(catch Mod:handle_info(Msg, State, E),
                         Msg, Server, Role, E).
 
 

@@ -58,7 +58,7 @@
                          {'ok', State} |
                          {'ok', Sync::term(), State}.
 
--spec handle_info(Msg::term(), State) ->
+-spec handle_info(Msg::term(), State, gen_leader:election()) ->
                          {'noreply', State} |
                          {'stop', Reason::term(), State} |
                          {'ok', State}.

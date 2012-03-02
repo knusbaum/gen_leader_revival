@@ -9,7 +9,7 @@
 -export([init/1,
          handle_cast/3,
          handle_call/4,
-         handle_info/2,
+         handle_info/3,
          handle_leader_call/4,
          handle_leader_cast/3,
          handle_DOWN/3,
@@ -189,11 +189,12 @@ handle_cast(_Msg, State, _Election) ->
 %% @doc
 %% Handling all non call/cast messages
 %%
-%% @spec handle_info(Info, State) -> {noreply, State} |
+%% @spec handle_info(Info, State, Election) ->
+%%                                   {noreply, State} |
 %%                                   {stop, Reason, State}
 %% @end
 %%--------------------------------------------------------------------
-handle_info(_Info, State) ->
+handle_info(_Info, State, _Election) ->
     {noreply, State}.
 
 %%--------------------------------------------------------------------
