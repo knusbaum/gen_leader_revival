@@ -873,15 +873,13 @@ loop(#server{parent = Parent,
                         false when E#election.leader == self() ->
                             %% We're a leader and we disagree with the other
                             %% leader. Tell everyone else to have an election.
-                            Newdown = E#election.down -- [Node],
-                            E1 = E#election{down = Newdown},
                             lists:foreach(
                                 fun(N) ->
                                     {Name, N} ! {election}
-                                end, E1#election.candidate_nodes),
+                                end, E#election.candidate_nodes),
                             %% Start participating in the election ourselves.
-                            E2 = startStage1(E, Server),
-                            safe_loop(Server, candidate, E2, Msg);
+                            E1 = startStage1(E, Server),
+                            safe_loop(Server, candidate, E1, Msg);
                         false ->
                             %% Not a leader, just wait to be told to do an
                             %% election, if applicable.
