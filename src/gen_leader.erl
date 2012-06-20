@@ -1540,7 +1540,7 @@ mon_loop(Parent, Refs) ->
         {'DOWN', Ref, _, _, _} ->
             mon_loop(Parent, mon_handle_down(Ref, Parent, Refs));
         Msg ->
-            io:fwrite("mon_loop received ~p~n", [Msg]),
+            io:fwrite("mon_loop with parent: ~p refs: ~p received: ~p~n", [Parent, Refs, Msg]),
             mon_loop(Parent, Refs)
     end.
 
