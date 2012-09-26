@@ -88,7 +88,8 @@
 
 %% Internal exports
 -export([init_it/6,
-         print_event/3
+         print_event/3,
+         send_checkleads/4
         ]).
 
 
@@ -896,12 +897,7 @@ loop(#server{parent = Parent,
                                     %% a message comparing their leader to our
                                     %% own. This allows us to trigger an
                                     %% election after a netsplit is healed.
-                                    F = fun(N) ->
-                                      {Name, N} ! {checklead, node()}
-                                    end,
-                                    [F(N) || N <- Down],
-                                    %% schedule another heartbeat
-                                    timer:send_after(E#election.cand_timer_int, {send_checklead}),
+                                    spawn(?MODULE, send_checkleads, [Name, E#election.cand_timer_int, self(), Down]),
                                     loop(Server, Role, E, Msg)
                             end;
                         false ->
@@ -1587,3 +1583,15 @@ flush_candidate_timers() ->
         0 ->
             ok
     end.
+
+%% sending messages to disconnected nodes can take a long time
+%% instead of doing this in the gen_leader process, do it here
+%% in a new proc so that gen_leader can remain responsive
+%% Reschedule the next round of checkleads after this round completes,
+%% since sending the messages can take longer than the time between rounds
+send_checkleads(Name, Time, GlProc, Down) ->
+	Node = node(),
+	[{Name, N} ! {checklead, Node} || N <- Down],
+	erlang:send_after(Time, GlProc, {send_checklead})
+	.
+
