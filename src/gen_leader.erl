@@ -99,7 +99,9 @@
 -type option() :: {'workers',    Workers::[node()]}
                 | {'vardir',     Dir::string()}
                 | {'bcast_type', Type::bcast_type()}
-                | {'heartbeat',  Seconds::integer()}.
+                | {'heartbeat',  Seconds::integer()}
+		| {'seed_node', Seed::node()}
+		.
 
 -type options() :: [option()].
 
@@ -134,7 +136,7 @@
           leader = none             :: 'none' | pid(),
           previous_leader = none    :: 'none' | pid(),
           name                      :: name(),
-          leadernode = none         :: node(),
+          leadernode = none         :: 'none' | node(),
           candidate_nodes = []      :: [node()],
           worker_nodes = []         :: [node()],
           down = []                 :: [node()],
@@ -1024,7 +1026,7 @@ loop(#server{parent = Parent,
                 _Msg when Debug == [] ->
                     handle_msg(Msg, Server, Role, E);
                 _Msg ->
-                    Debug1 = sys:handle_debug(Debug, {?MODULE, print_event},
+                    Debug1 = sys:handle_debug(Debug, fun ?MODULE:print_event/3,
                                               E#election.name, {in, Msg}),
                     handle_msg(Msg, Server#server{debug = Debug1}, Role, E)
             end
@@ -1040,6 +1042,7 @@ system_continue(_Parent, _Debug, [normal, Server, Role, E]) ->
     loop(Server, Role, E,{}).
 
 %% @hidden
+-spec system_terminate(any(), any(), any(), any()) -> no_return() .
 system_terminate(Reason, _Parent, _Debug, [_Mode, Server, Role, E]) ->
     terminate(Reason, [], Server, Role, E).
 
@@ -1212,7 +1215,7 @@ reply({To, Tag}, Reply, #server{state = State} = Server, Role, E) ->
 handle_debug(#server{debug = []} = Server, _Role, _E, _Event) ->
     Server;
 handle_debug(#server{debug = Debug} = Server, _Role, E, Event) ->
-    Debug1 = sys:handle_debug(Debug, {?MODULE, print_event},
+    Debug1 = sys:handle_debug(Debug, fun ?MODULE:print_event/3,
                               E#election.name, Event),
     Server#server{debug = Debug1}.
 
