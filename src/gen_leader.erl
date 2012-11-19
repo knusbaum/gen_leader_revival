@@ -84,8 +84,6 @@
          worker_announce/2
         ]).
 
--export([behaviour_info/1]).
-
 %% Internal exports
 -export([init_it/6,
          print_event/3,
@@ -166,30 +164,58 @@
           mod,
           state,
           monitor_proc = spawn_monitor_proc(),
-          debug
+	  debug :: [sys:dbg_opt()]
          }).
 
 %%% ---------------------------------------------------
 %%% Interface functions.
 %%% ---------------------------------------------------
 
--spec behaviour_info(atom()) -> 'undefined' | [{atom(), arity()}].
-
-behaviour_info(callbacks) ->
-    [{init,1},
-     {elected,3},
-     {surrendered,3},
-     {handle_leader_call,4},
-     {handle_leader_cast,3},
-     {from_leader,3},
-     {handle_call,4},
-     {handle_cast,3},
-     {handle_DOWN,3},
-     {handle_info,3},
-     {terminate,2},
-     {code_change,4}];
-behaviour_info(_Other) ->
-    undefined.
+-callback init(any()) -> {ok, term()}
+	| {stop, term()}
+	| ignore
+	| {'EXIT', term()}
+	.
+-callback elected(term(), election(), pid()) -> {ok, term(), term()}
+	| {reply, term(), term()}
+	.
+-callback surrendered(term(), term(), election()) -> {ok, term()} .
+-callback handle_leader_call(term(), pid(), term(), election()) -> {reply, term(), term()}
+	| {reply, term(), term(), term()}
+	| {noreply, term()}
+	| {stop, term(), term(), term()}
+	.
+-callback handle_leader_cast(term(), term(), election()) -> {noreply, term()}
+	| {ok, term(), term()}
+	.
+-callback from_leader(term(), term(), election()) -> {noreply, term()}
+	| {ok, term()}
+	| {stop, term(), term()}
+	| {'EXIT', term()}
+	.
+-callback handle_call(term(), pid(), term(), election()) -> {noreply, term()}
+	| {reply, term(), term()}
+	| {ok, term()}
+	| {stop, term(), term()}
+	| {'EXIT', term()}
+	.
+-callback handle_cast(term(), term(), election()) -> {noreply, term()}
+	| {ok, term()}
+	| {stop, term(), term()}
+	| {'EXIT', term()}
+	.
+-callback handle_DOWN(node(), term(), election()) -> {ok, term()}
+	| {ok, term(), term()}
+	.
+-callback handle_info(term(), term(), election()) -> {noreply, term()}
+	| {ok, term()}
+	| {stop, term(), term()}
+	| {'EXIT', term()}
+	.
+-callback terminate(term(), term()) -> any() .
+-callback code_change(term() | {down, term()}, term(), election(), term()) -> {ok, term()}
+	| {error, term()}
+	.
 
 -type start_ret() :: {'ok', pid()} | {'error', term()}.
 
