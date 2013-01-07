@@ -417,13 +417,14 @@ init_it(Starter, Parent, {local, Name}, Mod, {CandidateNodes, Workers, Arg}, Opt
 init_it(Starter, self, Name, Mod, {CandidateNodes, OptArgs, Arg}, Options) ->
     init_it(Starter, self(), Name, Mod,
             {CandidateNodes, OptArgs, Arg}, Options);
-init_it(Starter,Parent,Name,Mod,{CandidateNodes,OptArgs,Arg},Options) ->
+init_it(Starter,Parent,Name,Mod,{UnsortedCandidateNodes,OptArgs,Arg},Options) ->
     Workers     = proplists:get_value(workers,   OptArgs, []),
     VarDir      = proplists:get_value(vardir,    OptArgs, "."),
     Interval    = proplists:get_value(heartbeat, OptArgs, ?TAU div 1000) * 1000,
     BcastType   = proplists:get_value(bcast_type,OptArgs, sender),
     Seed        = proplists:get_value(seed,      OptArgs, none),
     Debug       = debug_options(Name, Options),
+    CandidateNodes = lists:sort(UnsortedCandidateNodes),
     AmCandidate = case lists:member(node(), CandidateNodes) of
                       true -> true;
                       false ->
