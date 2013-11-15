@@ -1441,7 +1441,10 @@ incarnation(VarDir, RegName, Node) ->
             0;
         {ok,_} ->
             {ok,Bin} = file:read_file(Name),
-            Incarn = binary_to_term(Bin),
+            Incarn = case catch binary_to_term(Bin) of
+                I when is_integer(I) -> I;
+                _ -> 0
+            end,
             ok = file:write_file(Name,term_to_binary(Incarn+1)),
             Incarn
     end.
