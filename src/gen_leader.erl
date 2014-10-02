@@ -178,7 +178,7 @@
 	| ignore
 	| {'EXIT', term()}
 	.
--callback elected(term(), election(), pid()) -> {ok, term(), term()}
+-callback elected(term(), election(), pid() | undefined) -> {ok, term(), term()}
 	| {reply, term(), term()}
 	.
 -callback surrendered(term(), term(), election()) -> {ok, term()} .
