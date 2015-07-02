@@ -479,8 +479,15 @@ init_it(Starter,Parent,Name,Mod,{UnsortedCandidateNodes,OptArgs,Arg},Options) ->
                     %% there's only one candidate leader; us
                     hasBecomeLeader(NewE,Server,{init});
                 false ->
-                    %% more than one candidate worker, continue as normal
-                    safe_loop(Server, candidate, NewE,{init})
+                    %% more than one candidate worker, broadcast about myself and
+                    %% go to candidate_joining
+                    lists:foreach(
+                      fun(Node) ->
+                        {NewE#election.name,Node} ! {join, self()}
+                      end,
+                    CandidateNodes -- [node()]),
+
+                    safe_loop(Server, candidate, NewE, {init})
             end;
         {{ok, State}, true, true} ->
             Server = #server{parent = Parent,mod = Mod,
