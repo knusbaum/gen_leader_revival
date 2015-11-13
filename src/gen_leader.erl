@@ -1471,12 +1471,12 @@ broadcast({from_leader, Msg}, ToNodes, E) ->
       end,ToNodes),
     E.
 
-broadcast_all(Msg, #election{alive = Alive} = E) ->
+broadcast_all(Msg, #election{} = E) ->
     lists:foreach(
       fun(Node) ->
               {E#election.name, Node} ! {broadcast, Msg}
       end, 
-      Alive),
+      alive(E)),
     E.
 
 lesser(_,[]) ->
