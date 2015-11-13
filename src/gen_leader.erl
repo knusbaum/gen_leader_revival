@@ -67,7 +67,8 @@
          start_link/6,
          leader_call/2, leader_call/3, leader_cast/2,
          call/2, call/3, cast/2,
-         reply/2]).
+         reply/2,
+         broadcast_all/2]).
 
 %% Query functions
 -export([alive/1,
@@ -1470,6 +1471,13 @@ broadcast({from_leader, Msg}, ToNodes, E) ->
       end,ToNodes),
     E.
 
+broadcast_all(Msg, #election{alive = Alive} = E) ->
+    lists:foreach(
+      fun(Node) ->
+              {E#election.name, Node} ! {broadcast, Msg}
+      end, 
+      Alive),
+    E.
 
 lesser(_,[]) ->
     [];
