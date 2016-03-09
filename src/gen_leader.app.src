@@ -1,13 +1,9 @@
-%%% -*- mode: erlang -*-
-
 {application, gen_leader,
- [
-  {description, "The gen_leader behaviour"},
-  {vsn, "1.0"},
-  {id, "gen_leader"},
+ [{description, "The gen_leader behaviour"},
+  {vsn, "0.1.0"},
   {modules, [gen_leader]},
-  {registered, [ ]},
-  %% NOTE: do not list applications which are load-only!
-  {applications, [ kernel, stdlib ] }
- ]
-}.
+  {registered, []},
+  {applications, [ kernel, stdlib ] },
+  {maintainers, ["knusbaum <KyleJNusbaum@gmail.com>"]},
+  {licenses, ["MIT/Expat"]},
+  {links, [{"GitHub", "https://github.com/knusbaum/gen_leader_revival"}]}]}.
